@@ -37,7 +37,9 @@ If your site has a period of time longer than six months where no activity takes
 **Development note:** due to missing functionality in the SumUp PHP SDK a file within the vendor directory has been manually altered.
 
 The manual change is the addition of the following line:
+
 ```$payload['redirect_url'] =  (string)\Concrete\Core\Support\Facade\Url::to('/checkout/sumupcompleteorder');```
+
 at line 91 of vendor/sumup/sumup-ecom-php-sdk/src/SumUp/Services/Checkouts.php
 
 SumUp may fix/improve the SDK in the future to remove this need for a manual fix.
