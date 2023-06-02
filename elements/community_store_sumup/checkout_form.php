@@ -3,23 +3,29 @@ defined('C5_EXECUTE') or die("Access Denied.");
 extract($vars);
 ?>
 
-<script src="https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js"></script>
 
 <div id="sumup-card"></div>
-<input type="hidden" value="" name="sumupCheckoutID" id="sumupCheckoutID" />
+<input type="hidden" value="" name="sumupCheckoutID" id="sumupCheckoutID"/>
 <script type="text/javascript">
 
-        var sumupCard = false;
 
-        window.addEventListener('load', function() {
+    window.addEventListener('load', function () {
+
+        var button = document.querySelector("[data-payment-method-id='<?= $pmID; ?>'] .store-btn-complete-order");
+        button.disabled = true;
+        button.setAttribute('data-value', button.value);
+
+        if (!sumupformobserver) {
             var e = document.getElementById('store-checkout-form-group-payment')
-            var observer = new MutationObserver(function (event) {
+            sumupformobserver = new MutationObserver(function (event) {
                 // get checkout ID here
 
-                var req = new XMLHttpRequest();
-                req.onreadystatechange = processResponse;
-                req.open("GET", "<?= \Concrete\Core\Support\Facade\Url::to('/checkout/sumupcreatecheckout'); ?>");
-                req.send();
+                if (event[0].target.classList.contains('store-active-form-group')) {
+                    var req = new XMLHttpRequest();
+                    req.onreadystatechange = processResponse;
+                    req.open("GET", "<?= \Concrete\Core\Support\Facade\Url::to('/checkout/sumupcreatecheckout'); ?>");
+                    req.send();
+                }
 
                 function processResponse() {
                     if (req.readyState !== 4) return; // State 4 is DONE
@@ -30,7 +36,7 @@ extract($vars);
 
                     sumupCard = SumUpCard.mount({
                         checkoutId: data.checkoutId,
-                        onResponse: function(type, body) {
+                        onResponse: function (type, body) {
                             // Verify the checkout is processed correctly.
                             // Display success message to the user and destroy the SumUpCard object:
 
@@ -52,36 +58,43 @@ extract($vars);
                         showZipCode: <?= $showZip ? 'true' : 'false'; ?>
                     });
 
+                    var button = document.querySelector("[data-payment-method-id='<?= $pmID; ?>'] .store-btn-complete-order");
+                    button.disabled = false;
+                    button.value = button.getAttribute('data-value');
                 }
-
-
             })
 
-            observer.observe(e, {
+            sumupformobserver.observe(e, {
                 attributes: true,
                 attributeFilter: ['class'],
                 childList: false,
                 characterData: false
             })
+        }
 
 
-            var button = document.querySelector("[data-payment-method-id='<?= $pmID; ?>'] .store-btn-complete-order");
-            button.addEventListener('click', function(event) {
-                event.preventDefault();
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
 
-                button.disabled = true;
-                button.setAttribute('data-value', button.value);
-                button.value = '<?= t('Processing...'); ?>';
+            button.disabled = true;
+            button.setAttribute('data-value', button.value);
+            button.value = '<?= t('Processing...'); ?>';
 
-                sumupCard.submit();
-            });
+            sumupCard.submit();
+        });
 
-         });
+    }, {once: true});
+
 </script>
 
 <style>
     #sumup-card {
-        margin-left: -20px;
-        margin-right: -20px;
+        margin-bottom: 20px;
+    }
+
+    [data-sumup-id="widget__container"] {
+        max-width: 100%;
+        padding-left: 0;
+        padding-right: 0;
     }
 </style>

@@ -134,6 +134,7 @@ class CommunityStoreSumupPaymentMethod extends StorePaymentMethod
         $clientSecret = Config::get('community_store_sumup.clientSecret');
         $refreshToken = Config::get('community_store_sumup.refreshToken');
         $payToEmail = Config::get('community_store_sumup.payToEmail');
+        $checkoutId = '';
 
         try {
             $sumup = new \SumUp\SumUp([
@@ -148,7 +149,7 @@ class CommunityStoreSumupPaymentMethod extends StorePaymentMethod
 
             $checkoutService = $sumup->getCheckoutService($refreshedAccessToken);
             $checkoutResponse = $checkoutService->create($price, $currency, $checkoutRef, $payToEmail);
-            $checkoutId = $checkoutResponse->getBody()->id;
+;            $checkoutId = $checkoutResponse->getBody()->id;
 
         } catch (\SumUp\Exceptions\SumUpAuthenticationException $e) {
             echo 'Authentication error: ' . $e->getMessage();
@@ -192,7 +193,7 @@ class CommunityStoreSumupPaymentMethod extends StorePaymentMethod
                     return $factory->redirect(Url::to('/dashboard/store/settings#settings-payments'));
                 }
             } catch (\Exception $e) {
-                    echo t('An error occurred fething an authorization code. Please check the Client ID, Client Secret values you are using and that the Authorized redirect URL is set within SumUp correctly.');
+                    echo t('An error occurred fetching an authorization code. Please check the Client ID, Client Secret values you are using and that the Authorized redirect URL is set within SumUp correctly.');
             }
         }
     }
@@ -229,6 +230,10 @@ class CommunityStoreSumupPaymentMethod extends StorePaymentMethod
             Session::set('notes', '');
             return Redirect::to($order->getOrderCompleteDestination());
         }
+    }
+
+    public function headerScripts($view) {
+        $view->addHeaderItem('<script src="https://gateway.sumup.com/gateway/ecom/card/v2/sdk.js"></script><script>var sumupformobserver = false;var sumupCard = false;</script>');
     }
 
     public function getPaymentMinimum()

@@ -7,13 +7,12 @@ use \Concrete\Core\Support\Facade\Route;
 use \Concrete\Package\CommunityStore\Src\CommunityStore\Payment\Method as PaymentMethod;
 use Whoops\Exception\ErrorException;
 
-
 class Controller extends Package
 {
     protected $pkgHandle = 'community_store_sumup';
     protected $appVersionRequired = '8.0';
-    protected $pkgVersion = '1.0.2';
-    protected $packageDependencies = ['community_store'=>'2.0'];
+    protected $pkgVersion = '1.1';
+    protected $packageDependencies = ['community_store'=>'2.5'];
 
     public function on_start()
     {
